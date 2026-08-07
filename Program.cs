@@ -14,6 +14,7 @@ DotNetEnv.Env.Load();
 builder.Services.AddDbContext<DbConfig>(options =>
 {
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URI"));
+    Console.WriteLine("Connection Established ");
 });
 
 builder.Configuration.AddEnvironmentVariables();

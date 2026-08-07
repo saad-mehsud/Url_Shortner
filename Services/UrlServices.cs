@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices.JavaScript;
 using Microsoft.EntityFrameworkCore;
 using Url_Shortner.Data;
 using Url_Shortner.Models;
@@ -62,13 +61,9 @@ public class UrlServices(DbConfig context) : IUrlServices
     public async Task<(URL?,Exception?)> UpdateUrlAsync(URL url)
     {
         try{
-            if (url is null)
+            if (!(await CheckIfUrlExistsAsync(url.Id)))
             {
-                return (null , new Exception("Url cannot be empty"));
-            }
-            else if (await CheckIfUrlExistsAsync(url.Id))
-            {
-                return (null , new Exception("Cannot shorten a shortened url."));
+                return (null , new Exception("URl with this id does not exist."));
             }
             else
             {
@@ -132,7 +127,7 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     public async Task<string> GetShortUrlAsync(string shortUrl)
     {
-        var url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl == shortUrl);
+        var url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
         return url?.LongUrl ?? "Url not found";
     }
 
@@ -144,8 +139,7 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     private bool CheckIfShortUrl(string url)
     {
-        return url.StartsWith(Environment.GetEnvironmentVariable("DOMAIN"));
+        var result = Task.FromResult(GetShortUrlAsync(url));
+        return result is null;
     }
-
-   
 }

@@ -9,14 +9,6 @@ namespace Url_Shortner.Controllers
     [ApiController]
     public class UrlController(IUrlServices service) : Controller
     {
-        URL[] _urls = 
-        {
-            new URL{Id =1,CreatedAt = DateTime.UtcNow, LongUrl = "https://google.com", ShortUrl = "https://local.com"},
-            
-            new URL{Id =2,CreatedAt = DateTime.UtcNow, LongUrl = "https://google.com", ShortUrl = "https://local.com"}
-        };
-
-
         [HttpGet]
         public async Task<ActionResult<List<URL>>> GetAllUrls()
             => await service.GetUrls();
@@ -24,7 +16,7 @@ namespace Url_Shortner.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
         {   
-            var url =  _urls.FirstOrDefault(url => url.Id == id);
+            var url =  await service.GetUrlByIdAsync(id);
             if (url is null)
             {
                 return NotFound("Url with this id cannot be found");
@@ -36,27 +28,51 @@ namespace Url_Shortner.Controllers
         [HttpPut]
         public async Task<ActionResult<URL>> UpdateUrl(URL url)
         {
-            return Ok(url);
+            var updatedUrl = await service.UpdateUrlAsync(url);
+            if (url is null)
+            {
+                return BadRequest("Url cannot be empty.");
+            }
+            else if (updatedUrl.Item2 is not null)
+            {
+                return BadRequest(updatedUrl.Item2.Message);
+            }
+            else
+            {
+                return Ok(updatedUrl.Item1);
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Createurl(CreateUrlRequest urlRequest)
         {
             var shortenUrl = await service.CreateUrl(urlRequest);
-            if (shortenUrl.Item1 is null)
+            if (urlRequest is null)
+            {
+                return BadRequest("Url cannot be empty.");
+            }
+            else if (shortenUrl.Item2 is not null)
             {
                 return BadRequest(shortenUrl.Item2.Message);
             }
             else
             {
-                return Ok(shortenUrl.Item1.ShortUrl);
+                return Ok(shortenUrl.Item1);
             }
         }
 
         [HttpDelete]
         public async Task<ActionResult<string>> DeleteUrl(int id)
         {
-            return Ok("Url with id " + id + " deleted");
+            string message =  await service.DeleteUrlAsync(id);
+            return Ok(message);
+        }
+        
+        [HttpGet("/{shortUrl}")]
+        public async Task<ActionResult<string>> GetShortUrl(string shortUrl)
+        {
+            string longUrl = await service.GetShortUrlAsync(shortUrl);
+            return Redirect(longUrl);
         }
     }
 }
