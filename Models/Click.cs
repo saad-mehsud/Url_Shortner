@@ -8,5 +8,4 @@ public class Click
      public DateTime DateClicke { get; set; } = DateTime.UtcNow;
      public string? referrer { get; set; }
      public string? ipAddress { get; set; }
-     public ICollection<Click> Clicks { get; set; } = new List<Click>();
 }    

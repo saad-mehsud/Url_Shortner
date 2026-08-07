@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.Models;
+using Url_Shortner.Services;
+using Url_Shortner.DTOs;
+
 namespace Url_Shortner.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UrlController : Controller
+    public class UrlController(IUrlServices service) : Controller
     {
         URL[] _urls = 
         {
@@ -19,7 +22,7 @@ namespace Url_Shortner.Controllers
             => await Task.FromResult(Ok(_urls));
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<URL>> GetUrlByIDAsync(int id)
+        public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
         {   
             var url =  _urls.FirstOrDefault(url => url.Id == id);
             if (url is null)
@@ -29,6 +32,24 @@ namespace Url_Shortner.Controllers
 
             return Ok(url);
 
+        }
+        [HttpPut]
+        public async Task<ActionResult<URL>> UpdateUrl(URL url)
+        {
+            return Ok(url);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<string>> Createurl(CreateUrlRequest urlRequest)
+        {
+            var shortenUrl = await service.CreateUrl(urlRequest);
+            return Ok(shortenUrl);
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult<string>> DeleteUrl(int id)
+        {
+            return Ok("Url with id " + id + " deleted");
         }
     }
 }

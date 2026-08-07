@@ -1,11 +1,15 @@
 using dotenv.net;
 using Scalar.AspNetCore;
+using Url_Shortner.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddScoped<IUrlServices,UrlServices>();
+
+
 builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
 
