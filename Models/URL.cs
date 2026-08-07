@@ -6,5 +6,5 @@ public class URL
     public string? LongUrl { get; set; } 
     public string? ShortUrl { get; set; } 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public ICollection<Click> Clicks { get; set; } = new List<Click>();
+    public ICollection<Click>? Clicks { get; set; } = new List<Click>();
 }

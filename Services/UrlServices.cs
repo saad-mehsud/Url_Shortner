@@ -1,20 +1,31 @@
+using Microsoft.EntityFrameworkCore;
+using Url_Shortner.Data;
 using Url_Shortner.Models;
 using Url_Shortner.DTOs;
 namespace Url_Shortner.Services;
 
-public class UrlServices : IUrlServices
+public class UrlServices(DbConfig context) : IUrlServices
 {
-    public Task<List<URL>> GetUrls() => throw new NotImplementedException();
-    public Task<URL> GetUrl(int id)
+    public Task<List<URL>> GetUrls()
     {
-        throw new NotImplementedException();
+        return Task.FromResult(context.Urls.ToList());
+    }
+    public async Task<(URL? , Exception?)> GetUrl(int id)
+    {
+        var url = await  context.Urls.FirstOrDefaultAsync(url => url.Id == id);
+        return url is null ? (null,new Exception("URL Not Found")) : (url,null);
     }
 
-    public async Task<URL> CreateUrl(CreateUrlRequest url)
+    public async Task<(URL?,Exception?)> CreateUrl(CreateUrlRequest url)
     {
-        if (CheckIfUrlExists(url.Url))
+        try{
+        if (string.IsNullOrEmpty(url.Url))
         {
-            throw new Exception("Url already exists");
+            return (null , new Exception("Url cannot be empty"));
+        }
+        else if (CheckIfShortUrl(url.Url))
+        {
+            return (null , new Exception("Cannot shorten a shortened url."));
         }
         else
         {
@@ -25,8 +36,14 @@ public class UrlServices : IUrlServices
                 CreatedAt = url.CreatedAt,
                 ShortUrl = shortUrl
             };
-
-            return newUrl;
+            context.Urls.Add(newUrl);
+            context.SaveChanges();
+            return (newUrl, null);
+        }
+        }
+        catch(Exception e)
+        {
+            return (null, e);
         }
         
 
@@ -51,6 +68,7 @@ public class UrlServices : IUrlServices
         {
             Random.Shared.GetItems(pool, span);
         })}";
+        
         return Task.FromResult(shortUrl);
     }
 
@@ -59,9 +77,15 @@ public class UrlServices : IUrlServices
         throw new NotImplementedException();
     }
 
-    private bool CheckIfUrlExists(string url)
+    private async  Task<bool> CheckIfUrlShortExistsAsync(string url)
     {
-        throw new NotImplementedException();
+        var existingUrl = await context.Urls.FirstOrDefaultAsync(u => u.LongUrl == url);
+        return  existingUrl is not  null;
+    }
+
+    private bool CheckIfShortUrl(string url)
+    {
+        return url.StartsWith(Environment.GetEnvironmentVariable("DOMAIN"));
     }
 
    

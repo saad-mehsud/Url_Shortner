@@ -18,8 +18,8 @@ namespace Url_Shortner.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<string>> GetAllUrls()
-            => await Task.FromResult(Ok(_urls));
+        public async Task<ActionResult<List<URL>>> GetAllUrls()
+            => await service.GetUrls();
 
         [HttpGet("{id}")]
         public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
@@ -43,7 +43,14 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<string>> Createurl(CreateUrlRequest urlRequest)
         {
             var shortenUrl = await service.CreateUrl(urlRequest);
-            return Ok(shortenUrl);
+            if (shortenUrl.Item1 is null)
+            {
+                return BadRequest(shortenUrl.Item2.Message);
+            }
+            else
+            {
+                return Ok(shortenUrl.Item1.ShortUrl);
+            }
         }
 
         [HttpDelete]
