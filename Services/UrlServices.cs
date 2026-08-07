@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.JavaScript;
 using Microsoft.EntityFrameworkCore;
 using Url_Shortner.Data;
 using Url_Shortner.Models;
@@ -10,14 +11,21 @@ public class UrlServices(DbConfig context) : IUrlServices
     {
         return Task.FromResult(context.Urls.ToList());
     }
+    
+    public async Task<URL?> GetUrlByIdAsync(int id)
+    {
+        return await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
+    }
     public async Task<(URL? , Exception?)> GetUrl(int id)
     {
         var url = await  context.Urls.FirstOrDefaultAsync(url => url.Id == id);
         return url is null ? (null,new Exception("URL Not Found")) : (url,null);
     }
 
+    
+    
     public async Task<(URL?,Exception?)> CreateUrl(CreateUrlRequest url)
-    {
+    { 
         try{
         if (string.IsNullOrEmpty(url.Url))
         {
@@ -37,7 +45,7 @@ public class UrlServices(DbConfig context) : IUrlServices
                 ShortUrl = shortUrl
             };
             context.Urls.Add(newUrl);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             return (newUrl, null);
         }
         }
@@ -49,16 +57,64 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     }
 
-    public Task<URL> UpdateUrl(URL url)
+    
+    
+    public async Task<(URL?,Exception?)> UpdateUrlAsync(URL url)
     {
-        throw new NotImplementedException();
+        try{
+            if (url is null)
+            {
+                return (null , new Exception("Url cannot be empty"));
+            }
+            else if (await CheckIfUrlExistsAsync(url.Id))
+            {
+                return (null , new Exception("Cannot shorten a shortened url."));
+            }
+            else
+            {
+               URL newUrl = new()
+                {
+                    Id = url.Id,
+                    LongUrl = url.LongUrl,
+                    CreatedAt = url.CreatedAt,
+                    ShortUrl = url.ShortUrl
+                };
+                context.Urls.Update(newUrl);
+                await context.SaveChangesAsync();
+                return (newUrl, null);
+            }
+        }
+        catch(Exception e)
+        {
+            return (null, e);
+        }
     }
 
-    public Task<string> DeleteUrl(int id)
+    
+    public async Task<string> DeleteUrlAsync(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (await CheckIfUrlExistsAsync(id))
+            {
+                var url = await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
+                context.Urls.Remove(url);
+                await context.SaveChangesAsync();
+                return $"Url with id {id} deleted";
+            }
+            else
+            {
+                return "Url with this id does not exist";
+            }
+        }
+        catch (Exception e)
+        {
+            return $"Error Occured:{e.Message}";
+        }
     }
 
+    
+    
     public Task<string> Shorten_LongUrls(string longUrl)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -72,14 +128,16 @@ public class UrlServices(DbConfig context) : IUrlServices
         return Task.FromResult(shortUrl);
     }
 
+    
+    
     public Task<string> Redirect(string shortUrl)
     {
         throw new NotImplementedException();
     }
 
-    private async  Task<bool> CheckIfUrlShortExistsAsync(string url)
+    private async  Task<bool> CheckIfUrlExistsAsync(int id )
     {
-        var existingUrl = await context.Urls.FirstOrDefaultAsync(u => u.LongUrl == url);
+        var existingUrl = await context.Urls.FirstOrDefaultAsync(u => u.Id == id);
         return  existingUrl is not  null;
     }
 
