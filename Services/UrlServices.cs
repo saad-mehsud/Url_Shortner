@@ -128,11 +128,12 @@ public class UrlServices(DbConfig context) : IUrlServices
         return Task.FromResult(shortUrl);
     }
 
-    
-    
-    public Task<string> Redirect(string shortUrl)
+
+
+    public async Task<string> GetShortUrlAsync(string shortUrl)
     {
-        throw new NotImplementedException();
+        var url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl == shortUrl);
+        return url?.LongUrl ?? "Url not found";
     }
 
     private async  Task<bool> CheckIfUrlExistsAsync(int id )

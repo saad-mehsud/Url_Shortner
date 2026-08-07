@@ -11,5 +11,6 @@ public interface IUrlServices
     Task<(URL?,Exception?)> UpdateUrlAsync(URL url);
     Task<string> DeleteUrlAsync(int id);
     Task<string> Shorten_LongUrls(string longUrl);
-    Task<string> Redirect(string shortUrl);
+    
+    Task<string> GetShortUrlAsync(string shortUrl);
 }
