@@ -4,21 +4,27 @@ using Url_Shortner.Models;
 using Url_Shortner.DTOs;
 namespace Url_Shortner.Services;
 
-public class UrlServices(DbConfig context) : IUrlServices
+public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlServices
 {
-    public Task<List<URL>> GetUrls()
+    
+    public async Task<List<URL>> GetUrls()
     {
-        return Task.FromResult(context.Urls.ToList());
+        return await context.Urls.Include(url => url.Clicks).ToListAsync();
     }
     
-    public async Task<URL?> GetUrlByIdAsync(int id)
-    {
-        return await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
-    }
+    
     public async Task<(URL? , int)> GetUrl(int id)
     {
-        var url = await  context.Urls.FirstOrDefaultAsync(url => url.Id == id);
-        return url is null ? (null,404) : (url,200);
+        URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.Id == id);
+        // if (url is null)
+        // {
+        //     return (null,404);
+        // }
+        // else
+        // {
+        //     url.Clicks = await clickServices.GetAllClicksAsync(url.Id);
+            return (url,200);
+        // }
     }
 
     

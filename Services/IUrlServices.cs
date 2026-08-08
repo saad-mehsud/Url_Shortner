@@ -5,7 +5,6 @@ namespace Url_Shortner.Services;
 public interface IUrlServices
 {
     Task<List<URL>> GetUrls();
-    Task<URL?> GetUrlByIdAsync(int id);
     Task<(URL? , int)> GetUrl(int id);
     Task<(URL?,Exception?)> CreateUrl(CreateUrlRequest url);
     Task<(URL?,Exception?)> UpdateUrlAsync(URL url);

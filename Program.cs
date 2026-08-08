@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUrlServices,UrlServices>();
-
+builder.Services.AddScoped<IClickServices,ClickServices>();
 builder.Services.AddDbContext<DbConfig>(options =>
 {
     DotNetEnv.Env.Load();

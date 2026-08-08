@@ -14,7 +14,7 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<List<URL>>> GetAllUrls()
             => await service.GetUrls();
 
-        [HttpGet("/{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
         {   
             var url =  await service.GetUrl(id);
@@ -68,8 +68,8 @@ namespace Url_Shortner.Controllers
             string message =  await service.DeleteUrlAsync(id);
             return StatusCode(201,message);
         }
-        [HttpGet("/short/{shortUrl}")]
-        public async Task<ActionResult<string>> GetShortUrl(string shortUrl)
+        [HttpGet("/{shortUrl}")]
+        public async Task<ActionResult> GetShortUrl(string shortUrl)
         {
             URL longUrl = await service.GetLongUrlAsync(shortUrl);
             if (longUrl is null)
@@ -78,8 +78,8 @@ namespace Url_Shortner.Controllers
             }
             else
             {
-                service.AddClick(longUrl.Id);
-                return Redirect(longUrl.LongUrl);
+                await service.AddClick(longUrl.Id);
+                return Redirect(longUrl.LongUrl!);
             }
             
         }
