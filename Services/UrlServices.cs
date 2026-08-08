@@ -15,10 +15,10 @@ public class UrlServices(DbConfig context) : IUrlServices
     {
         return await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
     }
-    public async Task<(URL? , Exception?)> GetUrl(int id)
+    public async Task<(URL? , int)> GetUrl(int id)
     {
         var url = await  context.Urls.FirstOrDefaultAsync(url => url.Id == id);
-        return url is null ? (null,new Exception("URL Not Found")) : (url,null);
+        return url is null ? (null,404) : (url,200);
     }
 
     
@@ -125,10 +125,10 @@ public class UrlServices(DbConfig context) : IUrlServices
 
 
 
-    public async Task<string> GetShortUrlAsync(string shortUrl)
+    public async Task<URL> GetLongUrlAsync(string shortUrl)
     {
         var url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
-        return url?.LongUrl ?? "Url not found";
+        return url ;
     }
 
     private async  Task<bool> CheckIfUrlExistsAsync(int id )
@@ -139,7 +139,20 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     private bool CheckIfShortUrl(string url)
     {
-        var result = Task.FromResult(GetShortUrlAsync(url));
+        var result = Task.FromResult(GetLongUrlAsync(url));
         return result is null;
+    }
+
+    public async Task AddClick(int id )
+    {
+        Click newClick = new()
+        {
+            UrlId = id,
+            DateClicke = DateTime.UtcNow
+        };
+        context.Clicks.Add(newClick);
+        await context.SaveChangesAsync();
+        
+
     }
 }

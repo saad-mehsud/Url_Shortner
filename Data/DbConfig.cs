@@ -8,10 +8,11 @@ public class DbConfig : DbContext
 {
     private readonly  IConfiguration _configuration;
 
-    public DbConfig(IConfiguration configuration)
+    public DbConfig(DbContextOptions<DbConfig> options, IConfiguration configuration) : base(options)
     {
         _configuration = configuration;
     }
+    
     
     public DbSet<URL> Urls { get; set; }
     public DbSet<Click> Clicks { get; set; }

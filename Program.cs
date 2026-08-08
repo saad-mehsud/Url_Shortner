@@ -10,9 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUrlServices,UrlServices>();
-DotNetEnv.Env.Load();
+
 builder.Services.AddDbContext<DbConfig>(options =>
 {
+    DotNetEnv.Env.Load();
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URI"));
     Console.WriteLine("Connection Established ");
 });

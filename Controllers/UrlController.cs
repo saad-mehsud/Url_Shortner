@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.Models;
 using Url_Shortner.Services;
@@ -13,16 +14,16 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<List<URL>>> GetAllUrls()
             => await service.GetUrls();
 
-        [HttpGet("{id}")]
+        [HttpGet("/{id}")]
         public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
         {   
-            var url =  await service.GetUrlByIdAsync(id);
-            if (url is null)
+            var url =  await service.GetUrl(id);
+            if (url.Item1 is null)
             {
-                return NotFound("Url with this id cannot be found");
+                return StatusCode(url.Item2, "Url not found");
             }
 
-            return Ok(url);
+            return StatusCode(url.Item2, url.Item1);
 
         }
         [HttpPut]
@@ -65,14 +66,22 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<string>> DeleteUrl(int id)
         {
             string message =  await service.DeleteUrlAsync(id);
-            return Ok(message);
+            return StatusCode(201,message);
         }
-        
-        [HttpGet("/{shortUrl}")]
+        [HttpGet("/short/{shortUrl}")]
         public async Task<ActionResult<string>> GetShortUrl(string shortUrl)
         {
-            string longUrl = await service.GetShortUrlAsync(shortUrl);
-            return Redirect(longUrl);
+            URL longUrl = await service.GetLongUrlAsync(shortUrl);
+            if (longUrl is null)
+            {
+                return NotFound("Url not found");
+            }
+            else
+            {
+                service.AddClick(longUrl.Id);
+                return Redirect(longUrl.LongUrl);
+            }
+            
         }
     }
 }
