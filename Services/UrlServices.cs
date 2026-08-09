@@ -4,9 +4,9 @@ using Url_Shortner.Models;
 using Url_Shortner.DTOs;
 namespace Url_Shortner.Services;
 
-public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlServices
+public class UrlServices(DbConfig context) : IUrlServices
 {
-    
+    #region ReadMethods
     public async Task<List<URL>> GetUrls()
     {
         return await context.Urls.Include(url => url.Clicks).ToListAsync();
@@ -22,13 +22,21 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
         }
         else
         {
-            url.Clicks = await clickServices.GetAllClicksAsync(url.Id);
             return (url,200);
         }
     }
+    
+    public async Task<URL> GetLongUrlAsync(string shortUrl)
+    {
+        URL url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
+        return url ;
+    }
 
+
+    #endregion ReadMethods    
     
     
+    #region WriteMethods
     public async Task<(URL?,Exception?)> CreateUrl(CreateUrlRequest url)
     { 
         try{
@@ -97,8 +105,7 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
         try
         {
             
-                URL url = await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
-                context.Urls.Remove(url);
+                await context.Urls.Where(url => url.Id == id ).ExecuteDeleteAsync();
                 await context.SaveChangesAsync();
                 return $"Url with id {id} deleted";
             
@@ -108,9 +115,24 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
             return $"Error Occured:{e.Message}";
         }
     }
+    
+    public async Task AddClick(int id )
+    {
+        Click newClick = new()
+        {
+            UrlId = id,
+            DateClicke = DateTime.UtcNow
+        };
+        context.Clicks.Add(newClick);
+        await context.SaveChangesAsync();
+        
 
-    
-    
+    }
+#endregion WriteMethods
+
+
+#region BusinessLogic
+
     public Task<string> Shorten_LongUrls(string longUrl)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -124,14 +146,10 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
         return Task.FromResult(shortUrl);
     }
 
+#endregion
 
-
-    public async Task<URL> GetLongUrlAsync(string shortUrl)
-    {
-        URL url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
-        return url ;
-    }
-
+  
+#region Helpers
     private async  Task<bool> CheckIfUrlExistsAsync(int id )
     {
         var existingUrl = await context.Urls.FirstOrDefaultAsync(u => u.Id == id);
@@ -143,17 +161,6 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
         var result = Task.FromResult(GetLongUrlAsync(url));
         return result is  null;
     }
-
-    public async Task AddClick(int id )
-    {
-        Click newClick = new()
-        {
-            UrlId = id,
-            DateClicke = DateTime.UtcNow
-        };
-        context.Clicks.Add(newClick);
-        await context.SaveChangesAsync();
-        
-
-    }
+#endregion Helpers
+   
 }
