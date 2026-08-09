@@ -66,7 +66,7 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<string>> DeleteUrl(int id)
         {
             string message =  await service.DeleteUrlAsync(id);
-            return StatusCode(201,message);
+            return StatusCode(203,message);
         }
         [HttpGet("/{shortUrl}")]
         public async Task<ActionResult> GetShortUrl(string shortUrl)

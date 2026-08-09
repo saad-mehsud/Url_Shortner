@@ -16,15 +16,15 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
     public async Task<(URL? , int)> GetUrl(int id)
     {
         URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.Id == id);
-        // if (url is null)
-        // {
-        //     return (null,404);
-        // }
-        // else
-        // {
-        //     url.Clicks = await clickServices.GetAllClicksAsync(url.Id);
+        if (url is null)
+        {
+            return (null,404);
+        }
+        else
+        {
+            url.Clicks = await clickServices.GetAllClicksAsync(url.Id);
             return (url,200);
-        // }
+        }
     }
 
     
@@ -96,17 +96,12 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
     {
         try
         {
-            if (await CheckIfUrlExistsAsync(id))
-            {
-                var url = await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
+            
+                URL url = await context.Urls.FirstOrDefaultAsync(url => url.Id == id);
                 context.Urls.Remove(url);
                 await context.SaveChangesAsync();
                 return $"Url with id {id} deleted";
-            }
-            else
-            {
-                return "Url with this id does not exist";
-            }
+            
         }
         catch (Exception e)
         {
@@ -133,7 +128,7 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
 
     public async Task<URL> GetLongUrlAsync(string shortUrl)
     {
-        var url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
+        URL url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
         return url ;
     }
 
@@ -146,7 +141,7 @@ public class UrlServices(DbConfig context,IClickServices clickServices) : IUrlSe
     private bool CheckIfShortUrl(string url)
     {
         var result = Task.FromResult(GetLongUrlAsync(url));
-        return result is null;
+        return result is  null;
     }
 
     public async Task AddClick(int id )
