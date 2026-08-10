@@ -100,19 +100,19 @@ public class UrlServices(DbConfig context) : IUrlServices
     }
 
     
-    public async Task<string> DeleteUrlAsync(int id)
+    public async Task<(string,int)> DeleteUrlAsync(int id)
     {
         try
         {
             
-                await context.Urls.Where(url => url.Id == id ).ExecuteDeleteAsync();
-                await context.SaveChangesAsync();
-                return $"Url with id {id} deleted";
-            
+                int  row = await context.Urls.Where(url => url.Id == id ).ExecuteDeleteAsync();
+
+                return row > 0 ? ($"Url with id {id} deleted", 203) : ($"Url with id {id} not found", 404);
+
         }
         catch (Exception e)
         {
-            return $"Error Occured:{e.Message}";
+            return ($"Error Occured:{e.Message}" , 500 );
         }
     }
     
