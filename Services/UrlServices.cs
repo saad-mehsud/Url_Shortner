@@ -26,10 +26,9 @@ public class UrlServices(DbConfig context) : IUrlServices
         }
     }
     
-    public async Task<URL> GetLongUrlAsync(string shortUrl)
+    public async Task<URL?> GetLongUrlAsync(string shortUrl)
     {
-        URL url = await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl.EndsWith(shortUrl));
-        return url ;
+        return await context.Urls.FirstOrDefaultAsync(url => url.ShortUrl != null &&   url.ShortUrl.EndsWith(shortUrl) ) ;
     }
 
 
@@ -44,7 +43,7 @@ public class UrlServices(DbConfig context) : IUrlServices
         {
             return (null , new Exception("Url cannot be empty"));
         }
-        else if (CheckIfShortUrl(url.Url))
+        else if (await CheckIfShortUrl(url.Url))
         {
             return (null , new Exception("Cannot shorten a shortened url."));
         }
@@ -156,9 +155,9 @@ public class UrlServices(DbConfig context) : IUrlServices
         return  existingUrl is not  null;
     }
 
-    private bool CheckIfShortUrl(string url)
+    private async  Task<bool> CheckIfShortUrl(string url)
     {
-        var result = Task.FromResult(GetLongUrlAsync(url));
+        var result = await GetLongUrlAsync(url);
         return result is  null;
     }
 #endregion Helpers

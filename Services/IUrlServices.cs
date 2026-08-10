@@ -11,5 +11,5 @@ public interface IUrlServices
     Task<(string,int)> DeleteUrlAsync(int id);
     Task<string> Shorten_LongUrls(string longUrl);
     public  Task AddClick(int id);
-    Task<URL> GetLongUrlAsync(string shortUrl);
+    Task<URL?> GetLongUrlAsync(string shortUrl);
 }
