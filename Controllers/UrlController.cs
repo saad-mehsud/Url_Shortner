@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.Models;
 using Url_Shortner.Services;
@@ -30,11 +29,7 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<URL>> UpdateUrl(URL url)
         {
             var updatedUrl = await service.UpdateUrlAsync(url);
-            if (url is null)
-            {
-                return BadRequest("Url cannot be empty.");
-            }
-            else if (updatedUrl.Item2 is not null)
+             if (updatedUrl.Item2 is not null)
             {
                 return BadRequest(updatedUrl.Item2.Message);
             }
@@ -45,14 +40,10 @@ namespace Url_Shortner.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> Createurl(CreateUrlRequest urlRequest)
+        public async Task<ActionResult<string>> CreateUrl(CreateUrlRequest urlRequest)
         {
             var shortenUrl = await service.CreateUrl(urlRequest);
-            if (urlRequest is null)
-            {
-                return BadRequest("Url cannot be empty.");
-            }
-            else if (shortenUrl.Item2 is not null)
+             if (shortenUrl.Item2 is not null)
             {
                 return BadRequest(shortenUrl.Item2.Message);
             }
@@ -62,7 +53,7 @@ namespace Url_Shortner.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpDelete("/:{id}")]
         public async Task<ActionResult<string>> DeleteUrl(int id)
         {
             var message =  await service.DeleteUrlAsync(id);
