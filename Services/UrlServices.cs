@@ -136,7 +136,7 @@ public class UrlServices(DbConfig context) : IUrlServices
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const int urlLength = 10;
-        DotNetEnv.Env.Load();
+        // DotNetEnv.Env.Load();
         string shortUrl = $"{Environment.GetEnvironmentVariable("DOMAIN")}/{ string.Create(urlLength, chars, (span,pool) =>
         {
             Random.Shared.GetItems(pool, span);
