@@ -9,7 +9,7 @@ namespace Url_Shortner.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(AuthServices authService) : ControllerBase
+    public class UserController(IAuthServices authService) : ControllerBase
     {
         [HttpPost("register")]
         public async Task<ActionResult<User>> Register(UserRequest request)
