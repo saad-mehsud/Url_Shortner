@@ -46,7 +46,7 @@ namespace Url_Shortner.Migrations
 
                     b.HasIndex("UrlId");
 
-                    b.ToTable("Clicks", (string)null);
+                    b.ToTable("Clicks");
                 });
 
             modelBuilder.Entity("Url_Shortner.Models.URL", b =>
@@ -66,25 +66,65 @@ namespace Url_Shortner.Migrations
                     b.Property<string>("ShortUrl")
                         .HasColumnType("text");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Urls", (string)null);
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Urls");
+                });
+
+            modelBuilder.Entity("Url_Shortner.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Url_Shortner.Models.Click", b =>
                 {
-                    b.HasOne("Url_Shortner.Models.URL", "Url")
+                    b.HasOne("Url_Shortner.Models.URL", null)
                         .WithMany("Clicks")
                         .HasForeignKey("UrlId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
 
-                    b.Navigation("Url");
+            modelBuilder.Entity("Url_Shortner.Models.URL", b =>
+                {
+                    b.HasOne("Url_Shortner.Models.User", null)
+                        .WithMany("Urls")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Url_Shortner.Models.URL", b =>
                 {
                     b.Navigation("Clicks");
+                });
+
+            modelBuilder.Entity("Url_Shortner.Models.User", b =>
+                {
+                    b.Navigation("Urls");
                 });
 #pragma warning restore 612, 618
         }

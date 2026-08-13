@@ -16,6 +16,7 @@ public class DbConfig : DbContext
     
     public DbSet<URL> Urls { get; set; }
     public DbSet<Click> Clicks { get; set; }
+    public DbSet<User> Users { get; set; }
 
 }
     
