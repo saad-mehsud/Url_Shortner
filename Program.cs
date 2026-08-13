@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IUrlServices,UrlServices>();
 builder.Services.AddScoped<IClickServices,ClickServices>();
-builder.Services.AddScoped<IAuthServices,AuthServices>();
+builder.Services.AddScoped<IUserServices,UserServices>();
 builder.Services.AddHealthChecks()
     .AddCheck<HealthCheck>("healthcheck")
     .AddNpgSql(Environment.GetEnvironmentVariable("DATABASE_URI")!);
