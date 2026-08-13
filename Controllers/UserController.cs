@@ -13,6 +13,10 @@ namespace Url_Shortner.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> RegisterAsync(UserRequest request)
         {
+            if (request.UserName is null || request.Password is null || request.Role is null)
+            {
+                return BadRequest("All fields are required");
+            }
             return await userService.CreateUserAsync(request);;
         }
         [HttpGet]
@@ -20,6 +24,8 @@ namespace Url_Shortner.Controllers
         {
             try
             {
+                /* Item1 is type List<User> will return  a list containing all the users
+                 Item2 is type Exception if not null will return BadRequest Status code*/
                 var result = await userService.GetAllUsersAsync();
                 if (result.Item1 is null)
                 {
@@ -39,6 +45,8 @@ namespace Url_Shortner.Controllers
         [HttpGet($"userName")]
         public async Task<ActionResult<User>> GetUserByIdAsync(string userName)
         {
+            /* Item1 is type User if null wil return NotFound Status code
+             Item2 is type Exception if not null will return BadRequest Status code*/
             var result = await userService.GetUserAsync(userName);
             if (result.Item1 is null)
             {
