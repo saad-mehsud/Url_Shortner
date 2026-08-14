@@ -17,12 +17,11 @@ namespace Url_Shortner.Controllers
         public async Task<ActionResult<List<URL>>> GetAllUrls()
             => await service.GetUrls();
         [Authorize]                        
-        [HttpGet("{id}")]
-        public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
+        [HttpGet("myUrls")]
+        public async Task<ActionResult<URL>> GetUrlByIdAsync()
         {
             string email = User.FindFirstValue(ClaimTypes.Email);
-            Console.WriteLine(email);
-            var url =  await service.GetUrl(id);
+            var url =  await service.GetUrl(email);
             if (url.Item1 is null)
             {
                 return StatusCode(url.Item2, "Url not found");

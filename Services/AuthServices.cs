@@ -69,17 +69,15 @@ public class AuthServices(DbConfig context) : IAuthServices
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.UserName),
-            new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role)
         };
         var key =  new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(DotNetEnv.Env.GetString("JWT_SECRET_KEY")));
+            Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var tokenDescriptor = new JwtSecurityToken(
         
-            issuer: DotNetEnv.Env.GetString("ISSUER"),
-            audience: DotNetEnv.Env.GetString("AUDIENCE"),
+            issuer: Environment.GetEnvironmentVariable("ISSUER"),
+            audience: Environment.GetEnvironmentVariable("AUDIENCE"),
             claims: claims,
             expires: DateTime.Now.AddMinutes(30),
             signingCredentials: credentials
