@@ -16,7 +16,8 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     public async Task<URL> GetUrl(int id)
     {
-        URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.Id == id);
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.UserId == user.Id);
         if (url is null)
         {
             throw new NotFoundException("Url", id);
