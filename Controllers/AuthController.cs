@@ -11,11 +11,7 @@ public class AuthController(IAuthServices authServices) : Controller
     [HttpPost]
     public async Task<ActionResult<AuthResponse>> Login(Authrequest request)
     {
-        var reponse = await authServices.Login(request);
-        if(reponse.StatusCode == 200)
-        {
-            return Ok(reponse);
-        }
-        return StatusCode(reponse.StatusCode, reponse);
+        var response = await authServices.Login(request);
+        return Ok(response);
     }
 }
