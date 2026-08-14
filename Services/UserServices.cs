@@ -12,6 +12,7 @@ public class UserServices (DbConfig context) : IUserServices
     public async Task<User> CreateUserAsync(UserRequest request)
     {
         User user = new();
+        user.Email = request.Email!;
         user.UserName = request.UserName!;
         user.PasswordHash = new PasswordHasher<User>().HashPassword(user,request.Password!);
         user.Role = request.Role!;
@@ -20,11 +21,11 @@ public class UserServices (DbConfig context) : IUserServices
         return await Task.FromResult(new User());
     }
 
-    public async Task<(User?,Exception?)> GetUserAsync(string userName)
+    public async Task<(User?,Exception?)> GetUserAsync(string email)
     {
         try
         {
-            User? user = await context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
             return (user,null);
         }
         catch (Exception e)
@@ -67,15 +68,15 @@ public class UserServices (DbConfig context) : IUserServices
         }
     }
 
-    public async Task<(bool,string,Exception?)> DeleteUserAsync(int id)
+    public async Task<(bool,string,Exception?)> DeleteUserAsync(string email)
     {
         try
         {
-            bool result = await context.Users.AnyAsync(u => u.Id == id);
+            bool result = await context.Users.AnyAsync(u => u.Email == email);
             if (result)
             {
-                int affectedRows = await context.Users.Where(u => u.Id == id ).ExecuteDeleteAsync();
-                return affectedRows > 0 ? (true, $"User with {id} deleted successfully.", null) : (false,$"User with id cannot be deleted.", null);
+                int affectedRows = await context.Users.Where(u => u.Email == email ).ExecuteDeleteAsync();
+                return affectedRows > 0 ? (true, $"User with {email} deleted successfully.", null) : (false,$"User with id cannot be deleted.", null);
             }
             else
             {

@@ -13,7 +13,7 @@ namespace Url_Shortner.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<User>> RegisterAsync(UserRequest request)
         {
-            if (request.UserName is null || request.Password is null || request.Role is null)
+            if (request.UserName is null || request.Password is null || request.Role is null || request.Email is null)
             {
                 return BadRequest("All fields are required");
             }
@@ -42,15 +42,15 @@ namespace Url_Shortner.Controllers
             }
         }
 
-        [HttpGet($"userName")]
-        public async Task<ActionResult<User>> GetUserByIdAsync(string userName)
+        [HttpGet($"email")]
+        public async Task<ActionResult<User>> GetUserByIdAsync(string email)
         {
             /* Item1 is type User if null wil return NotFound Status code
              Item2 is type Exception if not null will return BadRequest Status code*/
-            var result = await userService.GetUserAsync(userName);
+            var result = await userService.GetUserAsync(email);
             if (result.Item1 is null)
             {
-                return NotFound($"Cannot find user with username {userName}");
+                return NotFound($"Cannot find user with username {email}");
             }
             else if (result.Item2 is not null)
             {
@@ -80,14 +80,14 @@ namespace Url_Shortner.Controllers
         }
 
         [HttpDelete("id")]
-        public async Task<ActionResult> DeleteUserAsync(int id)
+        public async Task<ActionResult> DeleteUserAsync(string email)
         {
             
                 /*Item1 is type bool that will be true if user is deleted successfully
                 Item2 is type string that will be error message if user is not deleted successfully
                 Item3 is type Exception that will be null if user is deleted successfully
                 And not null if user is not deleted successfully*/
-                var result = await userService.DeleteUserAsync(id);
+                var result = await userService.DeleteUserAsync(email);
                 if (result.Item1)
                 {
                     return Ok(result.Item2);
