@@ -46,6 +46,7 @@ namespace Url_Shortner.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<string>> CreateUrl(CreateUrlRequest urlRequest)
         {
             var shortenUrl = await service.CreateUrl(urlRequest);
