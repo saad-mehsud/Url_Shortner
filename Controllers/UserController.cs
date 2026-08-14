@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.DTOs;
 using Url_Shortner.Models;
@@ -17,8 +17,10 @@ namespace Url_Shortner.Controllers
             {
                 return BadRequest("All fields are required");
             }
-            return await userService.CreateUserAsync(request);;
+            User user = await userService.CreateUserAsync(request);
+            return user ==  null ? BadRequest("User already exists") : Ok(user);
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetAllUsersAsync()
         {
@@ -61,7 +63,8 @@ namespace Url_Shortner.Controllers
                 return Ok(result.Item1);
             }
         }
-
+        
+        [Authorize]
         [HttpPut]
         public async Task<ActionResult> UpdateUserAsync(User user)
         {
@@ -78,7 +81,7 @@ namespace Url_Shortner.Controllers
             }
             
         }
-
+        [Authorize]
         [HttpDelete("id")]
         public async Task<ActionResult> DeleteUserAsync(string email)
         {

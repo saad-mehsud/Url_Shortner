@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Url_Shortner.Data;
@@ -11,6 +12,10 @@ public class UserServices (DbConfig context) : IUserServices
     
     public async Task<User> CreateUserAsync(UserRequest request)
     {
+        if (await context.Users.AnyAsync(u => u.Email == request.Email))
+        {
+            return null;
+        }
         User user = new();
         user.Email = request.Email!;
         user.UserName = request.UserName!;
@@ -20,7 +25,6 @@ public class UserServices (DbConfig context) : IUserServices
         await context.SaveChangesAsync();
         return await Task.FromResult(new User());
     }
-
     public async Task<(User?,Exception?)> GetUserAsync(string email)
     {
         try
@@ -33,7 +37,6 @@ public class UserServices (DbConfig context) : IUserServices
             return (null,e);
         }
     }
-
     public async Task<(List<User>?,Exception?)> GetAllUsersAsync()
     {
         try
@@ -45,7 +48,6 @@ public class UserServices (DbConfig context) : IUserServices
             return (null,e);
         }
     }
-
     public async Task<(bool,string)> UpdateUserAsync(User user)
     {
         try
@@ -67,7 +69,6 @@ public class UserServices (DbConfig context) : IUserServices
             return (false,e.Message);
         }
     }
-
     public async Task<(bool,string,Exception?)> DeleteUserAsync(string email)
     {
         try

@@ -1,9 +1,8 @@
 using System.Text;
-using System.Text.Json;
-using dotenv.net;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Url_Shortner.Data;
 using Url_Shortner.Services;
@@ -29,6 +28,21 @@ builder.Services.AddDbContext<DbConfig>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URI"));
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = Environment.GetEnvironmentVariable("ISSUER"),
+            ValidateAudience = true,
+            ValidAudience = Environment.GetEnvironmentVariable("AUDIENCE"),
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!))
+        };
+    });
 builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
 
@@ -44,7 +58,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions()
 {
     ResponseWriter =  HealthCheck.WriteResponse
 });
-
+app.UseAuthorization();
 app.MapControllers();
 app.Run();
 

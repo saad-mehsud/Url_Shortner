@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.Models;
 using Url_Shortner.Services;
@@ -7,15 +9,19 @@ namespace Url_Shortner.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class UrlController(IUrlServices service) : Controller
     {
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<List<URL>>> GetAllUrls()
             => await service.GetUrls();
-
+        [Authorize]                        
         [HttpGet("{id}")]
         public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
-        {   
+        {
+            string email = User.FindFirstValue(ClaimTypes.Email);
+            Console.WriteLine(email);
             var url =  await service.GetUrl(id);
             if (url.Item1 is null)
             {
