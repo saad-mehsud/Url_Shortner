@@ -1,10 +1,12 @@
 using System.Text;
+using EntityFramework.Exceptions.PostgreSQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Url_Shortner.Data;
+using Url_Shortner.Exceptions;
 using Url_Shortner.Services;
 using Url_Shortner.Utils;
 
@@ -16,6 +18,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddScoped<IUrlServices,UrlServices>();
 builder.Services.AddScoped<IClickServices,ClickServices>();
 builder.Services.AddScoped<IUserServices,UserServices>();
@@ -25,7 +29,8 @@ builder.Services.AddHealthChecks()
     .AddNpgSql(Environment.GetEnvironmentVariable("DATABASE_URI")!);
 builder.Services.AddDbContext<DbConfig>(options =>
 {
-    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URI"));
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URI"))
+        .UseExceptionProcessor();
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -53,6 +58,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapHealthChecks("/health", new HealthCheckOptions()
 {

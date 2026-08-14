@@ -1,92 +1,67 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Url_Shortner.Data;
 using Url_Shortner.DTOs;
+using Url_Shortner.Exceptions;
 using Url_Shortner.Models;
 
 namespace Url_Shortner.Services;
 
-public class UserServices (DbConfig context) : IUserServices
-{   
-    
+public class UserServices(DbConfig context) : IUserServices
+{
     public async Task<User> CreateUserAsync(UserRequest request)
     {
         if (await context.Users.AnyAsync(u => u.Email == request.Email))
         {
-            return null;
+            throw new ConflictException("A user with this email already exists.");
         }
-        User user = new();
-        user.Email = request.Email!;
-        user.UserName = request.UserName!;
-        user.PasswordHash = new PasswordHasher<User>().HashPassword(user,request.Password!);
-        user.Role = request.Role!;
+
+        User user = new()
+        {
+            Email = request.Email,
+            UserName = request.UserName,
+            Role = request.Role
+        };
+        user.PasswordHash = new PasswordHasher<User>().HashPassword(user, request.Password);
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        return await Task.FromResult(new User());
+        return user;
     }
-    public async Task<(User?,Exception?)> GetUserAsync(string email)
+
+    public async Task<User> GetUserAsync(string email)
     {
-        try
+        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is null)
         {
-            User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            return (user,null);
+            throw new NotFoundException("User", email);
         }
-        catch (Exception e)
-        {
-            return (null,e);
-        }
+
+        return user;
     }
-    public async Task<(List<User>?,Exception?)> GetAllUsersAsync()
+
+    public async Task<List<User>> GetAllUsersAsync()
     {
-        try
-        {
-            return (await context.Users.ToListAsync(),null);
-        }
-        catch (Exception e)
-        {
-            return (null,e);
-        }
+        return await context.Users.ToListAsync();
     }
-    public async Task<(bool,string)> UpdateUserAsync(User user)
+
+    public async Task UpdateUserAsync(User user)
     {
-        try
+        bool exists = await context.Users.AnyAsync(u => u.Id == user.Id);
+        if (!exists)
         {
-            bool result = await context.Users.AnyAsync(u => u.Id == user.Id);
-            if (result)
-            {
-                context.Users.Update(user);
-                int updatedRows = await context.SaveChangesAsync();
-                return updatedRows > 0 ? (true, "User updated successfully") : (false, "User not updated");
-            }
-            else
-            {
-                return (false, "User not found");
-            }
+            throw new NotFoundException("User", user.Id);
         }
-        catch (Exception e)
-        {
-            return (false,e.Message);
-        }
+
+        context.Users.Update(user);
+        await context.SaveChangesAsync();
     }
-    public async Task<(bool,string,Exception?)> DeleteUserAsync(string email)
+
+    public async Task DeleteUserAsync(string email)
     {
-        try
+        int affectedRows = await context.Users.Where(u => u.Email == email).ExecuteDeleteAsync();
+        if (affectedRows == 0)
         {
-            bool result = await context.Users.AnyAsync(u => u.Email == email);
-            if (result)
-            {
-                int affectedRows = await context.Users.Where(u => u.Email == email ).ExecuteDeleteAsync();
-                return affectedRows > 0 ? (true, $"User with {email} deleted successfully.", null) : (false,$"User with id cannot be deleted.", null);
-            }
-            else
-            {
-                return (false, "User not found", null);
-            }
-        }
-        catch (Exception e)
-        {
-            return (false, "Error Occured", e);
+            throw new NotFoundException("User", email);
         }
     }
 }
