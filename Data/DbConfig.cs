@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using dotenv.net;
 using Url_Shortner.Models;
 using DotNetEnv;
+using Microsoft.Build.Framework;
 namespace Url_Shortner.Data;
 
 public class DbConfig : DbContext
@@ -17,6 +18,13 @@ public class DbConfig : DbContext
     public DbSet<URL> Urls { get; set; }
     public DbSet<Click> Clicks { get; set; }
     public DbSet<User> Users { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+        .HasIndex(u =>u.Email)
+        .IsUnique();
+
+    }
 
 }
     
