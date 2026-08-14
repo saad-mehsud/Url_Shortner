@@ -58,7 +58,7 @@ public class AuthServices(DbConfig context) : IAuthServices
             return new AuthResponse
             {
                 StatusCode = 500,
-                Message = "Error Occured{e.Message}"
+                Message = $"Error Occured{e.Message}+{e.StackTrace}"
             };
         }
 
