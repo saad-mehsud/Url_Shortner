@@ -1,11 +1,13 @@
+using System.ComponentModel.DataAnnotations;
 
+namespace Url_Shortner.DTOs;
 
-
-namespace Url_Shortner.DTOs
+public class Authrequest
 {
-    public class Authrequest
-    {
-        public string? Email { get; set; }
-        public string? Password { get; set; }
-    }
+    [Required]
+    [EmailAddress]
+    public required string Email { get; set; }
+
+    [Required]
+    public required string Password { get; set; }
 }
