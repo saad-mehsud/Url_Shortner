@@ -16,8 +16,7 @@ public class UrlServices(DbConfig context) : IUrlServices
 
     public async Task<URL> GetUrl(int id)
     {
-        User? user = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.UserId == user.Id);
+        URL? url = await context.Urls.Include(url => url.Clicks).FirstOrDefaultAsync(url => url.UserId == id);
         if (url is null)
         {
             throw new NotFoundException("Url", id);
@@ -36,7 +35,7 @@ public class UrlServices(DbConfig context) : IUrlServices
     #region WriteMethods
     public async Task<URL> CreateUrl(CreateUrlRequest url)
     {
-        if (await CheckIfShortUrl(url.Url))
+        if (!(await CheckIfShortUrl(url.Url)))
         {
             throw new BadRequestException("Cannot shorten a shortened url.");
         }
@@ -46,7 +45,8 @@ public class UrlServices(DbConfig context) : IUrlServices
         {
             LongUrl = url.Url,
             CreatedAt = url.CreatedAt,
-            ShortUrl = shortUrl
+            ShortUrl = shortUrl,
+            UserId = url.UserId
         };
         context.Urls.Add(newUrl);
         await context.SaveChangesAsync();

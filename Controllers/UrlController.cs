@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Url_Shortner.DTOs;
@@ -17,9 +18,10 @@ public class UrlController(IUrlServices service) : Controller
         => await service.GetUrls();
 
     [Authorize]
-    [HttpGet("{id}")]
-    public async Task<ActionResult<URL>> GetUrlByIdAsync(int id)
+    [HttpGet("myUrls")]
+    public async Task<ActionResult<URL>> GetUrlByIdAsync()
     {
+        int id = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var url = await service.GetUrl(id);
         return Ok(url);
     }
@@ -35,6 +37,7 @@ public class UrlController(IUrlServices service) : Controller
     [Authorize]
     public async Task<ActionResult<URL>> CreateUrl(CreateUrlRequest urlRequest)
     {
+        urlRequest.UserId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var shortenUrl = await service.CreateUrl(urlRequest);
         return Ok(shortenUrl);
     }
