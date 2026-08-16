@@ -64,6 +64,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions()
 {
     ResponseWriter =  HealthCheck.WriteResponse
 });
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

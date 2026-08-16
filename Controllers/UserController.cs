@@ -10,6 +10,7 @@ namespace Url_Shortner.Controllers;
 [ApiController]
 public class UserController(IUserServices userService) : ControllerBase
 {
+    
     [HttpPost("register")]
     public async Task<ActionResult<User>> RegisterAsync(UserRequest request)
     {
@@ -24,7 +25,7 @@ public class UserController(IUserServices userService) : ControllerBase
         var users = await userService.GetAllUsersAsync();
         return Ok(users);
     }
-
+    [Authorize]
     [HttpGet("email")]
     public async Task<ActionResult<User>> GetUserByIdAsync(string email)
     {

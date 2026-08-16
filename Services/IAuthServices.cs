@@ -4,5 +4,6 @@ namespace Url_Shortner.Services;
 
 public interface IAuthServices
 {
-    Task<AuthResponse> Login(Authrequest request);
+    Task<TokenResponse> Login(Authrequest request);
+    Task<TokenResponse> RefreshTokenAsync(RefreshRequest request);   
 }
