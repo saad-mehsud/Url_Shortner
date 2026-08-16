@@ -68,6 +68,10 @@ public class GlobalExceptionHandler(
                 StatusCodes.Status409Conflict,
                 "Conflict",
                 "The request conflicts with related data."),
+            Npgsql.NpgsqlException => (
+                StatusCodes.Status503ServiceUnavailable,
+                "Check Services Health",
+                exception.Message),
             _ => (
                 StatusCodes.Status500InternalServerError,
                 "Internal Server Error",
