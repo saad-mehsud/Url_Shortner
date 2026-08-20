@@ -13,16 +13,18 @@ public class DbConfig : DbContext
     {
         _configuration = configuration;
     }
-    
+    //
     
     public DbSet<URL> Urls { get; set; }
     public DbSet<Click> Clicks { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
         .HasIndex(u =>u.Email)
         .IsUnique();
+        RefreshToken.OnModelCreating(modelBuilder);
 
     }
 
