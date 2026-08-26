@@ -19,6 +19,7 @@ public class DbConfig : DbContext
     public DbSet<Click> Clicks { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<TokenReuse>  ReuseTokens { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()

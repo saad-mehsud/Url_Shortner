@@ -19,7 +19,7 @@ public class RefreshToken
     public DateTime? created { get; set; }
     public DateTime? blacklisted { get; set; }
     public int userId { get; set; }
-
+    public ICollection<TokenReuse>? tokenReuse { get; set; }
     [ForeignKey(nameof(userId))]
     public User? User { get; set; }
 

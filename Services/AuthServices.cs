@@ -12,11 +12,11 @@ using Url_Shortner.Models;
 
 namespace Url_Shortner.Services;
 
-public class AuthServices(DbConfig context) : IAuthServices
+public class AuthServices(DbConfig dbContext) : IAuthServices
 {
     public async Task<TokenResponse> Login(Authrequest request)
     {
-        User? user = await context.Users.Where(u => u.Email == request.Email).FirstOrDefaultAsync();
+        User? user = await dbContext.Users.Where(u => u.Email == request.Email).FirstOrDefaultAsync();
 
         if (user is null)
         {
@@ -29,7 +29,7 @@ public class AuthServices(DbConfig context) : IAuthServices
         {
             throw new UnauthorizedException("Invalid email or password");
         }
-        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
+        RefreshToken? token = await dbContext.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
         
         if(token is null) {
             token = new()
@@ -68,7 +68,7 @@ public class AuthServices(DbConfig context) : IAuthServices
    
     public async Task<TokenResponse> RefreshTokenAsync(RefreshRequest refreshRequest)
     {
-        User? user = await context.Users.FindAsync(refreshRequest.UserId);
+        User? user = await dbContext.Users.FindAsync(refreshRequest.UserId);
         bool isValid = await ValidateRefreshTokenAsync(refreshRequest.UserId, refreshRequest.RefreshToken);
         if (!isValid || user is null)
         {
@@ -76,7 +76,7 @@ public class AuthServices(DbConfig context) : IAuthServices
         }
         else
         {
-            RefreshToken? tok = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
+            RefreshToken? tok = await dbContext.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
         
             string token = await GenerateAndSaveRefreshTokenAsync(tok!);
             return new TokenResponse()
@@ -89,10 +89,19 @@ public class AuthServices(DbConfig context) : IAuthServices
     
     private async Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken)
     {
-        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok =>tok.token  == refreshToken);
-        if (token is null || token.expires <= DateTime.UtcNow || token.status != Status.Active)
+        RefreshToken? token = await dbContext.RefreshTokens.FirstOrDefaultAsync(tok =>tok.token  == refreshToken);
+        if (token is null )
         {
-            return false;
+            throw new NotFoundException("Refresh Token", refreshToken);
+        }
+        else if (token.expires <= DateTime.UtcNow)
+        {
+            throw new UnauthorizedException("Refresh Token has expired");
+        }
+        else if (token.status == Status.Revoked)
+        {
+            await ReuseDetectedAsync(token);
+            throw new UnauthorizedException("Refresh Token has been revoked");
         }
         else
         {
@@ -100,20 +109,54 @@ public class AuthServices(DbConfig context) : IAuthServices
         }
     }
 
-    public  async Task<string> GenerateAndSaveRefreshTokenAsync(RefreshToken refreshToken)
+    private  async Task<string> GenerateAndSaveRefreshTokenAsync(RefreshToken refreshToken)
     {
         try{
-        string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        refreshToken.token = token;
-        refreshToken.expires = DateTime.UtcNow.AddDays(7);
-        refreshToken.status = Status.Active;
-        context.RefreshTokens.Update(refreshToken);
-        await context.SaveChangesAsync();
+            string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            await DiscardRefreshToken(refreshToken);
+            RefreshToken rtoken = new RefreshToken()
+            {
+                token = token,
+                userId = refreshToken.userId,
+                User = refreshToken.User,
+                created = DateTime.UtcNow,
+                expires = DateTime.UtcNow.AddDays(7),
+                status = Status.Active
+            };
+        dbContext.RefreshTokens.Add(rtoken);
+        await dbContext.SaveChangesAsync();
         return  token;
         }
         catch(Exception)
         {
             throw;
         }
+    }
+
+    private async Task DiscardRefreshToken(RefreshToken refreshToken)
+    {
+        try
+        {
+            refreshToken.status = Status.Revoked;
+            dbContext.RefreshTokens.Update(refreshToken);
+            await dbContext.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    private async Task ReuseDetectedAsync(RefreshToken refreshToken)
+    {
+        TokenReuse tokenReuse = new()
+        {
+            token = refreshToken,
+            userId = refreshToken.userId,
+            createdAt = DateTime.UtcNow
+        };
+        await dbContext.ReuseTokens.AddAsync(tokenReuse);
+        await dbContext.SaveChangesAsync();
+        
     }
 }
