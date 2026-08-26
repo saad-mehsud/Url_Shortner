@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Url_Shortner.Models;
 
@@ -12,4 +13,12 @@ public class URL
     public int UserId { get; set; }
     [ForeignKey(nameof(UserId))]
     public User? user {get; set;}
+    public static void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<URL>()
+        .HasOne(url => url.user)
+        .WithMany(user => user.Urls)
+        .HasForeignKey(url => url.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+    }
 }
