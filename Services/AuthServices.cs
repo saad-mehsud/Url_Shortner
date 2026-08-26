@@ -29,7 +29,7 @@ public class AuthServices(DbConfig context) : IAuthServices
         {
             throw new UnauthorizedException("Invalid email or password");
         }
-        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id == user.Id && tok.status == Status.Active);
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
         
         if(token is null) {
             token = new()
@@ -76,9 +76,9 @@ public class AuthServices(DbConfig context) : IAuthServices
         }
         else
         {
-            RefreshToken? tok = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id == user.Id && tok.status == Status.Active);
+            RefreshToken? tok = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User!.Id == user.Id && tok.status == Status.Active);
         
-            string token = await GenerateAndSaveRefreshTokenAsync(tok);
+            string token = await GenerateAndSaveRefreshTokenAsync(tok!);
             return new TokenResponse()
             {
                 AccessToken = CreateToken(user),
