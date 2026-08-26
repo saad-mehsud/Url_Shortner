@@ -10,6 +10,5 @@ public class User
     public string Role { get; set; } = "User";
     public ICollection<URL>? Urls { get; set; } = new List<URL>();
     public ICollection<RefreshToken>? RefreshTokens { get; set; } = new List<RefreshToken>();
-    public string? RefreshToken { get; set; } = "";
-    public DateTime TokenExpiration { get; set; } = DateTime.UtcNow.AddDays(7);
+    
 }

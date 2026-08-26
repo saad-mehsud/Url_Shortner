@@ -29,11 +29,11 @@ public class AuthServices(DbConfig context) : IAuthServices
         {
             throw new UnauthorizedException("Invalid email or password");
         }
-
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id == user.Id && tok.status == Status.Active);
         return new TokenResponse()
         {
             AccessToken = CreateToken(user),
-            RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+            RefreshToken = await GenerateAndSaveRefreshTokenAsync(token!)
         };
     }
 
@@ -59,10 +59,12 @@ public class AuthServices(DbConfig context) : IAuthServices
 
     private async Task<TokenResponse> GenerateTokenAsync(User user)
     {
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id == user.Id && tok.status == Status.Active);
+        
         return new TokenResponse()
         {
             AccessToken = CreateToken(user),
-            RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+            RefreshToken = await GenerateAndSaveRefreshTokenAsync(token)
         };
     }
     public async Task<TokenResponse> RefreshTokenAsync(RefreshRequest refreshRequest)
@@ -75,7 +77,9 @@ public class AuthServices(DbConfig context) : IAuthServices
         }
         else
         {
-            string token = await GenerateAndSaveRefreshTokenAsync(user);
+            RefreshToken? tok = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id == user.Id && tok.status == Status.Active);
+        
+            string token = await GenerateAndSaveRefreshTokenAsync(tok);
             return new TokenResponse()
             {
                 AccessToken = CreateToken(user),
@@ -86,8 +90,8 @@ public class AuthServices(DbConfig context) : IAuthServices
     
     private async Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken)
     {
-        var user = await context.Users.FindAsync(userId);
-        if (user is null || user.TokenExpiration <= DateTime.UtcNow)
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id  == userId);
+        if (token is null || token.expires >= DateTime.UtcNow || token.status != Status.Active)
         {
             return false;
         }
@@ -97,11 +101,11 @@ public class AuthServices(DbConfig context) : IAuthServices
         }
     }
 
-    public  async Task<string> GenerateAndSaveRefreshTokenAsync(User user)
+    public  async Task<string> GenerateAndSaveRefreshTokenAsync(RefreshToken refreshToken)
     {
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        user.RefreshToken = token;
-        user.TokenExpiration = DateTime.UtcNow.AddDays(7);
+        refreshToken.token = token;
+        refreshToken.expires = DateTime.UtcNow.AddDays(7);
         await context.SaveChangesAsync();
         return  token;
     }
