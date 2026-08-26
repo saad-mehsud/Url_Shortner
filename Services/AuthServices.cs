@@ -89,7 +89,7 @@ public class AuthServices(DbConfig context) : IAuthServices
     
     private async Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken)
     {
-        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => token.token  == refreshToken);
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok =>tok.token  == refreshToken);
         if (token is null || token.expires <= DateTime.UtcNow || token.status != Status.Active)
         {
             return false;
