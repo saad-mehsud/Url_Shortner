@@ -89,8 +89,8 @@ public class AuthServices(DbConfig context) : IAuthServices
     
     private async Task<bool> ValidateRefreshTokenAsync(int userId, string refreshToken)
     {
-        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => tok.User.Id  == userId);
-        if (token is null || token.expires >= DateTime.UtcNow || token.status != Status.Active)
+        RefreshToken? token = await context.RefreshTokens.FirstOrDefaultAsync(tok => token.token  == refreshToken);
+        if (token is null || token.expires <= DateTime.UtcNow || token.status != Status.Active)
         {
             return false;
         }
@@ -106,6 +106,8 @@ public class AuthServices(DbConfig context) : IAuthServices
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         refreshToken.token = token;
         refreshToken.expires = DateTime.UtcNow.AddDays(7);
+        refreshToken.status = Status.Active;
+        context.RefreshTokens.Update(refreshToken);
         await context.SaveChangesAsync();
         return  token;
         }
