@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Url_Shortner.Models;
 
 public class URL
@@ -8,4 +10,6 @@ public class URL
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Click>? Clicks { get; set; } = new List<Click>();
     public int UserId { get; set; }
+    [ForeignKey(nameof(UserId))]
+    public User? user {get; set;}
 }

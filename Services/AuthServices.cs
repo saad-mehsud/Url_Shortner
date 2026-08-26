@@ -103,10 +103,16 @@ public class AuthServices(DbConfig context) : IAuthServices
 
     public  async Task<string> GenerateAndSaveRefreshTokenAsync(RefreshToken refreshToken)
     {
+        try{
         string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         refreshToken.token = token;
         refreshToken.expires = DateTime.UtcNow.AddDays(7);
         await context.SaveChangesAsync();
         return  token;
+        }
+        catch(Exception exception)
+        {
+            throw exception;
+        }
     }
 }
