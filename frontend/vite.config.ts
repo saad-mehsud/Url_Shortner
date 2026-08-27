@@ -4,24 +4,29 @@ import fs from 'fs';
 import path from 'path';
 
 function fixHashPathPlugin(): Plugin {
+  const root = process.cwd();
   return {
     name: 'fix-hash-path',
     enforce: 'pre',
     resolveId(source, importer) {
-      if (importer && (source.startsWith('./') || source.startsWith('../') || source.startsWith('/'))) {
-        const importerDir = path.dirname(importer.split('?')[0]);
-        const targetPath = path.resolve(importerDir, source);
+      let target = '';
+      if (source.startsWith('/')) {
+        target = path.join(root, source);
+      } else if (importer && (source.startsWith('./') || source.startsWith('../'))) {
+        target = path.resolve(path.dirname(importer.split('?')[0]), source);
+      }
 
+      if (target) {
         const candidates = [
-          targetPath,
-          `${targetPath}.tsx`,
-          `${targetPath}.ts`,
-          `${targetPath}.jsx`,
-          `${targetPath}.js`,
-          path.join(targetPath, 'index.tsx'),
-          path.join(targetPath, 'index.ts'),
-          path.join(targetPath, 'index.jsx'),
-          path.join(targetPath, 'index.js'),
+          target,
+          `${target}.tsx`,
+          `${target}.ts`,
+          `${target}.jsx`,
+          `${target}.js`,
+          path.join(target, 'index.tsx'),
+          path.join(target, 'index.ts'),
+          path.join(target, 'index.jsx'),
+          path.join(target, 'index.js'),
         ];
 
         for (const candidate of candidates) {
@@ -29,6 +34,13 @@ function fixHashPathPlugin(): Plugin {
             return candidate;
           }
         }
+      }
+      return null;
+    },
+    load(id) {
+      const cleanPath = id.split('?')[0];
+      if (cleanPath && cleanPath.includes('/C#/') && fs.existsSync(cleanPath) && fs.statSync(cleanPath).isFile()) {
+        return fs.readFileSync(cleanPath, 'utf8');
       }
       return null;
     },
