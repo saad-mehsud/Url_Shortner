@@ -6,3 +6,4 @@ riderModule.iml
 .env
 Url_Shortner.sln.DotSettings.user
 /.idea
+/frontend/node_modules
