@@ -14,6 +14,7 @@ DotNetEnv.Env.Load();
 
 
 var builder = WebApplication.CreateBuilder(args);
+var corsPolicy = "_corsPolicy";
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -48,6 +49,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_SECRET_KEY")!))
         };
     });
+builder.Services.AddCors(options => 
+    options.AddPolicy(name:corsPolicy,policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    }
+    )
+);
 builder.Configuration.AddEnvironmentVariables();
 var app = builder.Build();
 
@@ -60,6 +70,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseCors(corsPolicy);
 app.MapHealthChecks("/health", new HealthCheckOptions()
 {
     ResponseWriter =  HealthCheck.WriteResponse
