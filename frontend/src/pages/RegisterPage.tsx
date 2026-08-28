@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User as UserIcon, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Link2, Shield } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Link2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -12,7 +12,6 @@ export const RegisterPage: React.FC = () => {
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'User' | 'Admin'>('User');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,11 +30,12 @@ export const RegisterPage: React.FC = () => {
 
     try {
       setIsLoading(true);
+      // Regular user registration is always granted the standard 'User' role
       await register({
         userName: userName.trim(),
         email: email.trim(),
         password,
-        role,
+        role: 'User',
       });
       navigate('/dashboard', { replace: true });
     } catch {
@@ -124,41 +124,9 @@ export const RegisterPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Role Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5 text-blue-500" />
-                Account Role
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRole('User')}
-                  className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
-                    role === 'User'
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  Standard User
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('Admin')}
-                  className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
-                    role === 'Admin'
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400'
-                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  Administrator
                 </button>
               </div>
             </div>
@@ -167,7 +135,7 @@ export const RegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-60 cursor-pointer"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-60 cursor-pointer mt-2"
             >
               {isLoading ? (
                 <>
