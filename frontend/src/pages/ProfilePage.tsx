@@ -142,11 +142,11 @@ export const ProfilePage: React.FC = () => {
             </form>
           </div>
 
-          {/* Security & Token Lifecycle Card */}
+          {/* Security & Session Card */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
             <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-500" />
-              Session & Token Security
+              Session & Security
             </h2>
 
             <div className="space-y-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -154,7 +154,7 @@ export const ProfilePage: React.FC = () => {
                 <Clock className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200">
-                    Access Token Expiry
+                    Session Status
                   </p>
                   <p>{tokenExpiry}</p>
                 </div>
@@ -164,11 +164,10 @@ export const ProfilePage: React.FC = () => {
                 <KeyRound className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-200">
-                    Refresh Token Rotation
+                    Secure Authentication
                   </p>
                   <p>
-                    Every refresh request generates a new 64-byte token and revokes the predecessor.
-                    Reused tokens trigger automatic security logs.
+                    Your active login session is protected with secure credentials and automatic session renewal.
                   </p>
                 </div>
               </div>

@@ -4,7 +4,6 @@ import {
   Users,
   Link2,
   MousePointerClick,
-  Activity,
   Search,
   Trash2,
   ExternalLink,
@@ -13,8 +12,6 @@ import {
   Check,
   RefreshCw,
   Loader2,
-  Database,
-  Server,
   Edit2,
   UserPlus,
   X,
@@ -26,7 +23,7 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useToast } from '../context/ToastContext';
-import { URLItem, User, HealthReport } from '../types';
+import { URLItem, User } from '../types';
 import { copyToClipboard, formatRelativeTime } from '../utils/formatters';
 import { StatsCard } from '../components/StatsCard';
 import { QRCodeModal } from '../components/QRCodeModal';
@@ -35,14 +32,12 @@ import { ClicksDetailModal } from '../components/ClicksDetailModal';
 export const AdminDashboardPage: React.FC = () => {
   const { success, error, warning } = useToast();
 
-  const [activeTab, setActiveTab] = useState<'urls' | 'users' | 'health'>('urls');
+  const [activeTab, setActiveTab] = useState<'urls' | 'users'>('urls');
   const [urls, setUrls] = useState<URLItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [health, setHealth] = useState<HealthReport | null>(null);
 
   const [isLoadingUrls, setIsLoadingUrls] = useState(true);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-  const [isLoadingHealth, setIsLoadingHealth] = useState(false);
 
   const [deletingUrlId, setDeletingUrlId] = useState<number | null>(null);
   const [deletingUserEmail, setDeletingUserEmail] = useState<string | null>(null);
@@ -96,22 +91,9 @@ export const AdminDashboardPage: React.FC = () => {
     }
   };
 
-  const fetchHealth = async () => {
-    try {
-      setIsLoadingHealth(true);
-      const report = await api.getHealth();
-      setHealth(report);
-    } catch {
-      setHealth({ status: 'Unhealthy / Offline' });
-    } finally {
-      setIsLoadingHealth(false);
-    }
-  };
-
   useEffect(() => {
     fetchAllUrls();
     fetchAllUsers();
-    fetchHealth();
   }, []);
 
   const handleDeleteUrl = async (id: number) => {
@@ -287,7 +269,7 @@ export const AdminDashboardPage: React.FC = () => {
             </h1>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            System-wide administration, global link repository, user accounts, and diagnostics.
+            System-wide administration, global link repository, and user accounts.
           </p>
         </div>
 
@@ -295,7 +277,6 @@ export const AdminDashboardPage: React.FC = () => {
           onClick={() => {
             fetchAllUrls();
             fetchAllUsers();
-            fetchHealth();
           }}
           className="self-start sm:self-auto flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-xs transition-colors cursor-pointer"
         >
@@ -305,7 +286,7 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <StatsCard
           title="System URLs"
           value={urls.length}
@@ -329,14 +310,6 @@ export const AdminDashboardPage: React.FC = () => {
           icon={MousePointerClick}
           iconColor="text-indigo-600 dark:text-indigo-400"
           bgColor="bg-indigo-50 dark:bg-indigo-950/50"
-        />
-        <StatsCard
-          title="System Health"
-          value={health?.status || 'Active'}
-          subtitle="PostgreSQL Connected"
-          icon={Activity}
-          iconColor="text-emerald-600 dark:text-emerald-400"
-          bgColor="bg-emerald-50 dark:bg-emerald-950/50"
         />
       </div>
 
@@ -364,18 +337,6 @@ export const AdminDashboardPage: React.FC = () => {
         >
           <Users className="w-4 h-4" />
           <span>User Accounts ({users.length})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('health')}
-          className={`pb-3 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
-            activeTab === 'health'
-              ? 'border-emerald-600 text-emerald-600 dark:border-emerald-400 dark:text-emerald-400'
-              : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-          }`}
-        >
-          <Activity className="w-4 h-4" />
-          <span>Diagnostics & Health</span>
         </button>
       </div>
 
@@ -624,73 +585,6 @@ export const AdminDashboardPage: React.FC = () => {
               </table>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Tab 3: Diagnostics */}
-      {activeTab === 'health' && (
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Live System Diagnostics
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Real-time health report queried from the ASP.NET Core `/health` endpoint
-              </p>
-            </div>
-            <button
-              onClick={fetchHealth}
-              disabled={isLoadingHealth}
-              className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingHealth ? 'animate-spin' : ''}`} />
-              <span>Ping Now</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold text-sm">
-                <Server className="w-4 h-4 text-blue-500" />
-                <span>Web Application Liveness</span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Status:{' '}
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  {health?.status || 'Unknown'}
-                </span>
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Description: {health?.results?.healthcheck?.description || 'Service is healthy'}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-semibold text-sm">
-                <Database className="w-4 h-4 text-indigo-500" />
-                <span>PostgreSQL Database Connectivity</span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Status:{' '}
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                  {health?.results?.npgsql?.status || (health?.status === 'Healthy' ? 'Healthy' : 'N/A')}
-                </span>
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Driver: Npgsql EntityFrameworkCore Provider (v10.0.3)
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Raw Health Response
-            </h4>
-            <pre className="p-4 rounded-xl bg-slate-950 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800">
-              {JSON.stringify(health, null, 2)}
-            </pre>
-          </div>
         </div>
       )}
 

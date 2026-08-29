@@ -7,8 +7,6 @@ import {
   Zap,
   BarChart3,
   QrCode,
-  Lock,
-  Database,
   CheckCircle2,
   Copy,
   Check,
@@ -83,7 +81,7 @@ export const HomePage: React.FC = () => {
 
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800/80 text-blue-700 dark:text-blue-300 text-xs font-semibold tracking-wide shadow-xs">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>High-Performance .NET 10 & PostgreSQL URL Engine</span>
+          <span>Fast, Simple & Secure URL Shortener</span>
         </div>
 
         <div className="space-y-4 max-w-3xl mx-auto px-4">
@@ -95,8 +93,8 @@ export const HomePage: React.FC = () => {
             , and Secure Every Link.
           </h1>
           <p className="text-base sm:text-xl text-slate-600 dark:text-slate-400 font-normal leading-relaxed max-w-2xl mx-auto">
-            Transform lengthy links into ultra-clean 10-character short links with instant redirection,
-            real-time visit metrics, QR code generation, and enterprise security.
+            Transform lengthy links into ultra-clean short links with instant redirection,
+            real-time visit metrics, QR code generation, and reliable link security.
           </p>
         </div>
 
@@ -181,7 +179,7 @@ export const HomePage: React.FC = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-2 mb-12">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            Built for Developers, Marketers & Teams
+            Built for Creators, Marketers & Teams
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
             Everything you need to create fast, reliable, and trackable links with zero friction.
@@ -198,7 +196,7 @@ export const HomePage: React.FC = () => {
               Instant Redirection
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Powered by .NET 10 and optimized PostgreSQL queries for sub-millisecond HTTP 302 redirects with automatic click logging.
+              Ultra-fast HTTP 302 redirects with automatic click logging, seamless link forwarding, and high availability.
             </p>
           </div>
 
@@ -211,7 +209,7 @@ export const HomePage: React.FC = () => {
               Click Analytics & Logs
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Track timestamps, visit counts, referrers, and visitor data per shortened URL directly in your user dashboard.
+              Track timestamps, visit counts, referrers, and visitor insights per shortened URL directly in your user dashboard.
             </p>
           </div>
 
@@ -221,34 +219,43 @@ export const HomePage: React.FC = () => {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Token Reuse Attack Defense
+              Enterprise-Grade Security
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Dual-token JWT architecture with automatic refresh token rotation and dedicated token reuse detection logging.
+              Secure authentication, protected user dashboards, and link verification designed to keep your URLs safe.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Tech Stack Callout */}
+      {/* Call To Action Section */}
       <section className="max-w-5xl mx-auto px-4">
-        <div className="p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-2xl relative overflow-hidden space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-center md:text-left">
-              <h3 className="text-2xl font-black">Modern Full-Stack Architecture</h3>
-              <p className="text-sm text-slate-300 max-w-lg">
-                Built with strict typing, clean separation of concerns, and full RFC 7807 problem details error handling.
+        <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-2xl relative overflow-hidden space-y-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="space-y-2">
+              <h3 className="text-2xl sm:text-3xl font-black">Ready to get started?</h3>
+              <p className="text-sm sm:text-base text-blue-100 max-w-lg">
+                Create custom shortened URLs, generate downloadable QR codes, and gain actionable click insights today.
               </p>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 text-xs font-semibold">
-                <Database className="w-4 h-4 text-cyan-400" />
-                PostgreSQL & EF Core 10
-              </div>
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 text-xs font-semibold">
-                <Lock className="w-4 h-4 text-emerald-400" />
-                JWT & Refresh Tokens
-              </div>
+            <div className="shrink-0">
+              {isAuthenticated ? (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-blue-600 hover:bg-blue-50 font-bold text-sm shadow-md transition-colors"
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              ) : (
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-blue-600 hover:bg-blue-50 font-bold text-sm shadow-md transition-colors"
+                >
+                  <span>Create Free Account</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
           </div>
         </div>

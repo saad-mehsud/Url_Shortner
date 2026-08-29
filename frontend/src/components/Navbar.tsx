@@ -11,7 +11,6 @@ import {
   Menu,
   X,
   PlusCircle,
-  FileCode2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -93,16 +92,6 @@ export const Navbar: React.FC = () => {
                 Admin Panel
               </Link>
             )}
-
-            <a
-              href="/scalar/v1"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
-            >
-              <FileCode2 className="w-4 h-4 text-emerald-500" />
-              API Docs
-            </a>
           </nav>
 
           {/* Right Action Icons & Auth */}
@@ -223,16 +212,6 @@ export const Navbar: React.FC = () => {
               Admin Panel
             </Link>
           )}
-
-          <a
-            href="/scalar/v1"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium text-emerald-600 dark:text-emerald-400"
-          >
-            <FileCode2 className="w-5 h-5" />
-            API Docs
-          </a>
 
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
             {isAuthenticated ? (
